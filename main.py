@@ -1,4 +1,3 @@
-# main.py
 import json
 import os
 import requests
@@ -10,8 +9,9 @@ def save_photos_info(photos_info, file_path):
     try:
         with open(file_path, 'w') as file:
             json.dump(photos_info, file, ensure_ascii=False, indent=4)
+        print(f"Информация о фотографиях успешно сохранена в {file_path}")
     except IOError as e:
-        print(f"Ошибка при сохранении информации в файл: {e}")
+        print(f"Ошибка при сохранении информации в файл {file_path}: {e}")
 
 def main():
     vk_token = input('Введите токен VK: ')
@@ -31,7 +31,7 @@ def main():
 
     photos = vk_api.get_photos(vk_user_id, count=photos_count)
     if photos is None:
-        print("Не удалось получить фотографии.")
+        print("Не удалось получить фотографии. Пожалуйста, проверьте, что вы ввели правильный токен и ID пользователя.")
         return
 
     photos_info = []
@@ -47,8 +47,9 @@ def main():
         try:
             with open(file_path, 'wb') as file:
                 file.write(requests.get(max_size_photo['url']).content)
+            print(f"Фотография успешно сохранена на диск: {file_path}")
         except IOError as e:
-            print(f"Ошибка при сохранении фотографии на диск: {e}")
+            print(f"Ошибка при сохранении фотографии на диск {file_path}: {e}")
             continue
 
         # Проверяем наличие файла на Яндекс.Диске и добавляем уникальный суффикс, если файл существует
@@ -62,7 +63,7 @@ def main():
         try:
             yandex_disk.upload_file(file_path, f"VK_Photos/{unique_file_name}")
         except Exception as e:
-            print(f"Ошибка при загрузке на Яндекс.Диск: {e}")
+            print(f"Ошибка при загрузке фотографии {file_path} на Яндекс.Диск: {e}")
             continue
 
         photos_info.append({
@@ -77,3 +78,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+

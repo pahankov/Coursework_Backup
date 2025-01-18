@@ -1,4 +1,3 @@
-# vk_api.py
 import requests
 
 class VKAPI:
@@ -23,7 +22,11 @@ class VKAPI:
             if 'response' in result:
                 return result['response']['items']
             else:
-                print(f"Ошибка в ответе: {result}")
+                error_code = result.get('error', {}).get('error_code', 'Unknown')
+                error_msg = result.get('error', {}).get('error_msg', 'Unknown error')
+                print(f"Ошибка в ответе: код ошибки {error_code}, сообщение: {error_msg}")
+                if error_code == 5:
+                    print("Ошибка авторизации VK: неверный токен доступа.")
                 return None
         except requests.RequestException as e:
             print(f"Ошибка при запросе фотографий: {e}")

@@ -1,8 +1,8 @@
 import requests
 
 class VKAPI:
-    def __init__(self, token):
-        self.token = token
+    def __init__(self):
+        self.token = "vk1.a.qaBLM8IVuTQJxmYSjqK_PF0-6U_MUqygqPLSFIZ6F0GYrkybRFiHkbEmGJeLzORCPQD2_5Qt_qLTDqZWsNhmMpFPL6jqIJIWGuUpQR4pyHGd2RO2Tf3UHEzgQhaFYZ6OimnjpM6sTnl0ACoiDbg2IYm-aEvCzx0W-SG-c6LgY13D9dDiQwr1x2i_jmbMFldA"
 
     def get_photos(self, user_id, count=5):
         try:

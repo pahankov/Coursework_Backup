@@ -14,12 +14,11 @@ def save_photos_info(photos_info, file_path):
         print(f"Ошибка при сохранении информации в файл {file_path}: {e}")
 
 def main():
-    vk_token = input('Введите токен VK: ')
-    yandex_token = input('Введите токен Яндекс.Диска: ')
     vk_user_id = input('Введите ID пользователя VK: ')
+    yandex_token = input('Введите токен Яндекс.Диска: ')
     photos_count = int(input('Введите количество фотографий для резервного копирования (по умолчанию 5): ') or 5)
 
-    vk_api = VKAPI(vk_token)
+    vk_api = VKAPI()
     yandex_disk = YandexDisk(yandex_token)
 
     # Создаем папку для сохранения фотографий
@@ -78,5 +77,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 

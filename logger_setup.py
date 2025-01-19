@@ -5,6 +5,10 @@ class LoggerSetup:
         self.logger = logging.getLogger('backup_logger')
         self.logger.setLevel(logging.INFO)
 
+        # Проверяем и удаляем существующие обработчики
+        if self.logger.hasHandlers():
+            self.logger.handlers.clear()
+
         # Создаем обработчик для вывода в консоль
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.INFO)
@@ -17,10 +21,9 @@ class LoggerSetup:
         file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
         file_handler.setFormatter(file_formatter)
 
-        # Проверяем, нет ли уже обработчиков, чтобы избежать дублирования
-        if not self.logger.hasHandlers():
-            self.logger.addHandler(console_handler)
-            self.logger.addHandler(file_handler)
+        self.logger.addHandler(console_handler)
+        self.logger.addHandler(file_handler)
 
     def get_logger(self):
         return self.logger
+

@@ -1,6 +1,7 @@
 import json
 import os
 import requests
+import sys
 from tqdm import tqdm
 from vk_api import VKAPI
 from yandex_disk import YandexDisk
@@ -10,6 +11,7 @@ from logger_setup import LoggerSetup
 logger_setup = LoggerSetup()
 logger = logger_setup.get_logger()
 
+
 def save_photos_info(photos_info, file_path):
     try:
         with open(file_path, 'w', encoding='utf-8') as file:
@@ -18,27 +20,56 @@ def save_photos_info(photos_info, file_path):
     except IOError as e:
         logger.error(f"Ошибка при сохранении информации в файл {file_path}: {e}")
 
-def main():
-    vk_user_id = input('Введите ID пользователя VK: ')
-    yandex_token = input('Введите токен Яндекс.Диска: ')
-    photos_count = int(input('Введите количество фотографий для резервного копирования (по умолчанию 5): ') or 5)
 
+def main():
     vk_api = VKAPI()
-    yandex_disk = YandexDisk(yandex_token)
+    while True:
+        vk_user_id = input('Введите ID пользователя VK (или нажмите Escape для выхода): ')
+        if vk_user_id.lower() == 'escape':
+            print("Выход из программы.")
+            sys.exit()
+
+        user_info = vk_api.get_user_info(vk_user_id)
+        if user_info is None:
+            error_message = "Не удалось получить информацию о пользователе. Пожалуйста, проверьте, что вы ввели правильный ID пользователя."
+            print(f"Ошибка: {error_message}")
+            logger.error(error_message)
+            continue
+
+        if 'error' in user_info:
+            error_message = user_info['error']
+            print(f"Ошибка: {error_message}")
+            logger.error(error_message)
+            continue
+
+        if user_info.get('is_closed'):
+            error_message = "Профиль пользователя закрыт."
+            print(f"Ошибка: {error_message}")
+            logger.error(error_message)
+            continue
+
+        break
+
+    while True:
+        yandex_token = input('Введите токен Яндекс.Диска (или нажмите Escape для выхода): ')
+        if yandex_token.lower() == 'escape':
+            print("Выход из программы.")
+            sys.exit()
+
+        yandex_disk = YandexDisk(yandex_token)
+        if not yandex_disk.check_token():
+            error_message = "Некорректный токен Яндекс.Диска. Пожалуйста, введите правильный токен."
+            print(f"Ошибка: {error_message}")
+            logger.error(error_message)
+            continue
+
+        break
+
+    photos_count_input = input('Введите количество фотографий для резервного копирования (по умолчанию 5): ')
+    photos_count = int(photos_count_input) if photos_count_input else 5
 
     # Информируем пользователя о сохранении логов после ввода данных
     logger.info('Логи будут сохранены в файл app.log')
-
-    # Проверка профиля пользователя
-    user_info = vk_api.get_user_info(vk_user_id)
-    if user_info is None:
-        logger.error("Не удалось получить информацию о пользователе. Пожалуйста, проверьте, что вы ввели правильный ID пользователя.")
-        return
-
-    if user_info.get('is_closed'):
-        logger.error("Профиль пользователя закрыт.")
-        print("Профиль пользователя закрыт. Невозможно получить доступ к фотографиям.")
-        return
 
     # Создаем папку для сохранения фотографий
     if not os.path.exists('photos'):
@@ -49,7 +80,9 @@ def main():
 
     photos = vk_api.get_photos(vk_user_id, count=photos_count)
     if photos is None:
-        logger.error("Не удалось получить фотографии. Пожалуйста, проверьте, что вы ввели правильный токен и ID пользователя.")
+        error_message = "Не удалось получить фотографии. Пожалуйста, проверьте, что вы ввели правильный токен и ID пользователя."
+        print(f"Ошибка: {error_message}")
+        logger.error(error_message)
         return
 
     photos_info = []
@@ -94,5 +127,12 @@ def main():
 
     logger.info('Резервное копирование завершено. Информация о фотографиях сохранена в photos_info.json.')
 
+
 if __name__ == '__main__':
     main()
+
+
+
+
+
+

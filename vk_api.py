@@ -23,16 +23,20 @@ class VKAPI:
             response = requests.get(url, params=params)
             response.raise_for_status()
             result = response.json()
-            if 'response' in result:
-                return result['response'][0]
+            if 'response' in result and result['response']:
+                user_info = result['response'][0]
+                if user_info.get('is_closed'):
+                    logging.error("Профиль пользователя закрыт.")
+                    return {'error': 'Профиль пользователя закрыт.'}
+                return user_info
             else:
                 error_code = result.get('error', {}).get('error_code', 'Unknown')
                 error_msg = result.get('error', {}).get('error_msg', 'Unknown error')
                 logging.error(f"Ошибка в ответе: код ошибки {error_code}, сообщение: {error_msg}")
-                return None
+                return {'error': f"Ошибка в ответе: код ошибки {error_code}, сообщение: {error_msg}"}
         except requests.RequestException as e:
             logging.error(f"Ошибка при запросе информации о пользователе: {e}")
-            return None
+            return {'error': f"Ошибка при запросе информации о пользователе: {e}"}
 
     def get_photos(self, user_id, count=5):
         try:
@@ -66,3 +70,4 @@ class VKAPI:
         except requests.RequestException as e:
             logging.error(f"Ошибка при запросе фотографий: {e}")
             return None
+

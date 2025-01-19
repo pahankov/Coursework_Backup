@@ -60,3 +60,14 @@ class YandexDisk:
             logging.error(f"Ошибка при загрузке на Яндекс.Диск: {e}")
         except IOError as e:
             logging.error(f"Ошибка при открытии файла для загрузки на Яндекс.Диск: {e}")
+
+    def check_token(self):
+        try:
+            url = self.create_url('')
+            headers = self.get_headers()
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            return True
+        except requests.RequestException as e:
+            logging.error(f"Ошибка при проверке токена Яндекс.Диска: {e}")
+            return False

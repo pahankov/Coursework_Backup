@@ -1,4 +1,5 @@
 import requests
+import logging
 
 class VKAPI:
     def __init__(self):
@@ -24,10 +25,10 @@ class VKAPI:
             else:
                 error_code = result.get('error', {}).get('error_code', 'Unknown')
                 error_msg = result.get('error', {}).get('error_msg', 'Unknown error')
-                print(f"Ошибка в ответе: код ошибки {error_code}, сообщение: {error_msg}")
+                logging.error(f"Ошибка в ответе: код ошибки {error_code}, сообщение: {error_msg}")
                 if error_code == 5:
-                    print("Ошибка авторизации VK: неверный токен доступа.")
+                    logging.error("Ошибка авторизации VK: неверный токен доступа.")
                 return None
         except requests.RequestException as e:
-            print(f"Ошибка при запросе фотографий: {e}")
+            logging.error(f"Ошибка при запросе фотографий: {e}")
             return None

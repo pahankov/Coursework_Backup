@@ -1,4 +1,5 @@
 import requests
+import logging
 
 class YandexDisk:
     def __init__(self, token):
@@ -11,15 +12,15 @@ class YandexDisk:
             params = {'path': folder_name}
             response = requests.put(url, headers=headers, params=params)
             if response.status_code == 409:
-                print(f"Папка '{folder_name}' уже существует на Яндекс.Диске.")
+                logging.info(f"Папка '{folder_name}' уже существует на Яндекс.Диске.")
             else:
                 response.raise_for_status()
-                print(f"Папка '{folder_name}' успешно создана на Яндекс.Диске.")
+                logging.info(f"Папка '{folder_name}' успешно создана на Яндекс.Диске.")
         except requests.RequestException as e:
             if response.status_code == 401:
-                print("Ошибка при создании папки на Яндекс.Диске: неверный токен доступа.")
+                logging.error("Ошибка при создании папки на Яндекс.Диске: неверный токен доступа.")
             else:
-                print(f"Ошибка при создании папки на Яндекс.Диске: {e}")
+                logging.error(f"Ошибка при создании папки на Яндекс.Диске: {e}")
 
     def file_exists(self, file_name):
         try:
@@ -33,9 +34,9 @@ class YandexDisk:
             return response.status_code == 200
         except requests.RequestException as e:
             if response.status_code == 401:
-                print("Ошибка при проверке наличия файла на Яндекс.Диске: неверный токен доступа.")
+                logging.error("Ошибка при проверке наличия файла на Яндекс.Диске: неверный токен доступа.")
             else:
-                print(f"Ошибка при проверке наличия файла на Яндекс.Диске: {e}")
+                logging.error(f"Ошибка при проверке наличия файла на Яндекс.Диске: {e}")
             return False
 
     def upload_file(self, file_path, file_name):
@@ -50,11 +51,11 @@ class YandexDisk:
             with open(file_path, 'rb') as file:
                 response = requests.put(upload_url, files={'file': file})
                 response.raise_for_status()
-            print(f"Фотография успешно загружена: {file_name}")
+            logging.info(f"Фотография успешно загружена: {file_name}")
         except requests.RequestException as e:
             if response.status_code == 401:
-                print("Ошибка при загрузке на Яндекс.Диск: неверный токен доступа.")
+                logging.error("Ошибка при загрузке на Яндекс.Диск: неверный токен доступа.")
             else:
-                print(f"Ошибка при загрузке на Яндекс.Диск: {e}")
+                logging.error(f"Ошибка при загрузке на Яндекс.Диск: {e}")
         except IOError as e:
-            print(f"Ошибка при открытии файла для загрузки на Яндекс.Диск: {e}")
+            logging.error(f"Ошибка при открытии файла для загрузки на Яндекс.Диск: {e}")

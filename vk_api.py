@@ -2,13 +2,14 @@ import requests
 import logging
 
 class VKAPI:
-    def __init__(self):
-        self.token = "vk1.a.qaBLM8IVuTQJxmYSjqK_PF0-6U_MUqygqPLSFIZ6F0GYrkybRFiHkbEmGJeLzORCPQD2_5Qt_qLTDqZWsNhmMpFPL6jqIJIWGuUpQR4pyHGd2RO2Tf3UHEzgQhaFYZ6OimnjpM6sTnl0ACoiDbg2IYm-aEvCzx0W-SG-c6LgY13D9dDiQwr1x2i_jmbMFldA"
+    def __init__(self, token):
+        self.token = token
 
     def get_headers(self):
         return {'Authorization': f'OAuth {self.token}'}
 
-    def create_url(self, endpoint):
+    @staticmethod
+    def create_url(endpoint):
         return f'https://api.vk.com/method/{endpoint}'
 
     def get_user_info(self, user_id):
@@ -32,6 +33,8 @@ class VKAPI:
             else:
                 error_code = result.get('error', {}).get('error_code', 'Unknown')
                 error_msg = result.get('error', {}).get('error_msg', 'Unknown error')
+                if error_code == 'Unknown':
+                    error_msg = 'Пользователь не найден или произошла неизвестная ошибка.'
                 logging.error(f"Ошибка в ответе: код ошибки {error_code}, сообщение: {error_msg}")
                 return {'error': f"Ошибка в ответе: код ошибки {error_code}, сообщение: {error_msg}"}
         except requests.RequestException as e:
@@ -55,8 +58,8 @@ class VKAPI:
             result = response.json()
             if 'response' in result:
                 if len(result['response']['items']) == 0:
-                    logging.error("ID пользователя VK не существует или у пользователя нет фотографий.")
-                    return None
+                    logging.error("У пользователя нет фотографий.")
+                    return {'error': 'У пользователя нет фотографий.'}
                 return result['response']['items']
             else:
                 error_code = result.get('error', {}).get('error_code', 'Unknown')
@@ -70,4 +73,3 @@ class VKAPI:
         except requests.RequestException as e:
             logging.error(f"Ошибка при запросе фотографий: {e}")
             return None
-

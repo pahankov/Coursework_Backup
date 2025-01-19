@@ -6,15 +6,34 @@ from tqdm import tqdm
 from vk_api import VKAPI
 from yandex_disk import YandexDisk
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Настройка логирования
+logger = logging.getLogger('backup_logger')
+logger.setLevel(logging.INFO)
+
+# Создаем обработчик для вывода в консоль
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(console_formatter)
+
+# Создаем обработчик для записи в файл с указанием кодировки UTF-8 и режимом дозаписи
+file_handler = logging.FileHandler('app.log', mode='a', encoding='utf-8')
+file_handler.setLevel(logging.INFO)
+file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(file_formatter)
+
+# Проверяем, нет ли уже обработчиков, чтобы избежать дублирования
+if not logger.hasHandlers():
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
 
 def save_photos_info(photos_info, file_path):
     try:
-        with open(file_path, 'w') as file:
+        with open(file_path, 'w', encoding='utf-8') as file:
             json.dump(photos_info, file, ensure_ascii=False, indent=4)
-        logging.info(f"Информация о фотографиях успешно сохранена в {file_path}")
+        logger.info(f"Информация о фотографиях успешно сохранена в {file_path}")
     except IOError as e:
-        logging.error(f"Ошибка при сохранении информации в файл {file_path}: {e}")
+        logger.error(f"Ошибка при сохранении информации в файл {file_path}: {e}")
 
 def main():
     vk_user_id = input('Введите ID пользователя VK: ')
@@ -23,6 +42,9 @@ def main():
 
     vk_api = VKAPI()
     yandex_disk = YandexDisk(yandex_token)
+
+    # Информируем пользователя о сохранении логов после ввода данных
+    logger.info('Логи будут сохранены в файл app.log')
 
     # Создаем папку для сохранения фотографий
     if not os.path.exists('photos'):
@@ -33,7 +55,11 @@ def main():
 
     photos = vk_api.get_photos(vk_user_id, count=photos_count)
     if photos is None:
-        logging.error("Не удалось получить фотографии. Пожалуйста, проверьте, что вы ввели правильный токен и ID пользователя.")
+        logger.error("Не удалось получить фотографии. Пожалуйста, проверьте, что вы ввели правильный токен и ID пользователя.")
+        return
+
+    if len(photos) == 0:
+        logger.error("ID пользователя VK не существует или у пользователя нет фотографий.")
         return
 
     photos_info = []
@@ -49,9 +75,9 @@ def main():
         try:
             with open(file_path, 'wb') as file:
                 file.write(requests.get(max_size_photo['url']).content)
-            logging.info(f"Фотография успешно сохранена на диск: {file_path}")
+            logger.info(f"Фотография успешно сохранена на диск: {file_path}")
         except IOError as e:
-            logging.error(f"Ошибка при сохранении фотографии на диск {file_path}: {e}")
+            logger.error(f"Ошибка при сохранении фотографии на диск {file_path}: {e}")
             continue
 
         # Проверяем наличие файла на Яндекс.Диске и добавляем уникальный суффикс, если файл существует
@@ -65,7 +91,7 @@ def main():
         try:
             yandex_disk.upload_file(file_path, f"VK_Photos/{unique_file_name}")
         except Exception as e:
-            logging.error(f"Ошибка при загрузке фотографии {file_path} на Яндекс.Диск: {e}")
+            logger.error(f"Ошибка при загрузке фотографии {file_path} на Яндекс.Диск: {e}")
             continue
 
         photos_info.append({
@@ -76,7 +102,7 @@ def main():
     # Сохраняем информацию о фотографиях в JSON-файл
     save_photos_info(photos_info, 'photos_info.json')
 
-    logging.info('Резервное копирование завершено. Информация о фотографиях сохранена в photos_info.json.')
+    logger.info('Резервное копирование завершено. Информация о фотографиях сохранена в photos_info.json.')
 
 if __name__ == '__main__':
     main()

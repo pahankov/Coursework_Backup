@@ -28,6 +28,8 @@ class VKAPI:
                 logging.error(f"Ошибка в ответе: код ошибки {error_code}, сообщение: {error_msg}")
                 if error_code == 5:
                     logging.error("Ошибка авторизации VK: неверный токен доступа.")
+                elif error_code == 113:
+                    logging.error("ID пользователя VK не существует.")
                 return None
         except requests.RequestException as e:
             logging.error(f"Ошибка при запросе фотографий: {e}")

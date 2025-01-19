@@ -69,6 +69,14 @@ def main():
                 logger.error(error_message)
                 continue
 
+            if yandex_disk.file_exists("VK_Photos"):
+                print("Папка 'VK_Photos' уже существует.")
+                logger.info("Папка 'VK_Photos' уже существует.")
+            else:
+                yandex_disk.create_folder("VK_Photos")
+                print("Папка 'VK_Photos' была создана.")
+                logger.info("Папка 'VK_Photos' была создана.")
+
             break
 
         photos_count_input = input('Введите количество фотографий для резервного копирования (по умолчанию 5): ')
@@ -80,9 +88,6 @@ def main():
         # Создаем папку для сохранения фотографий
         if not os.path.exists('photos'):
             os.makedirs('photos')
-
-        # Создаем папку на Яндекс.Диске
-        yandex_disk.create_folder("VK_Photos")
 
         photos = vk_api.get_photos(vk_user_id, count=photos_count)
         if photos is None or 'error' in photos:
@@ -138,6 +143,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 
 
 

@@ -5,8 +5,8 @@ class LoggerSetup:
         self.logger = logging.getLogger('backup_logger')
         self.logger.setLevel(logging.DEBUG)
 
-        # Создаем обработчик для вывода логов в файл
-        file_handler = logging.FileHandler('app.log')
+        # Создаем обработчик для вывода логов в файл с кодировкой UTF-8
+        file_handler = logging.FileHandler('app.log', encoding='utf-8')
         file_handler.setLevel(logging.DEBUG)
 
         # Создаем форматтер и добавляем его в обработчик
@@ -21,6 +21,8 @@ class LoggerSetup:
 
     def get_logger(self):
         return self.logger
+
+
 
 
 

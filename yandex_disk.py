@@ -5,44 +5,48 @@ class YandexDisk:
     def __init__(self, token):
         self.token = token
 
+    def get_headers(self):
+        return {'Authorization': f'OAuth {self.token}'}
+
+    def create_url(self, endpoint):
+        return f'https://cloud-api.yandex.net/v1/disk/{endpoint}'
+
     def create_folder(self, folder_name):
+        logging.info(f"Создание папки '{folder_name}' на Яндекс.Диске.")
         try:
-            url = 'https://cloud-api.yandex.net/v1/disk/resources'
-            headers = {'Authorization': f'OAuth {self.token}'}
+            url = self.create_url('resources')
+            headers = self.get_headers()
             params = {'path': folder_name}
             response = requests.put(url, headers=headers, params=params)
-            if response.status_code == 409:
+            if response.status_code == 201:
+                logging.info(f"Папка '{folder_name}' успешно создана на Яндекс.Диске.")
+            elif response.status_code == 409:
                 logging.info(f"Папка '{folder_name}' уже существует на Яндекс.Диске.")
             else:
                 response.raise_for_status()
-                logging.info(f"Папка '{folder_name}' успешно создана на Яндекс.Диске.")
         except requests.RequestException as e:
-            if response.status_code == 401:
-                logging.error("Ошибка при создании папки на Яндекс.Диске: неверный токен доступа.")
-            else:
-                logging.error(f"Ошибка при создании папки на Яндекс.Диске: {e}")
+            logging.error(f"Ошибка при создании папки на Яндекс.Диске: {e}")
 
     def file_exists(self, file_name):
         try:
-            url = 'https://cloud-api.yandex.net/v1/disk/resources'
-            headers = {'Authorization': f'OAuth {self.token}'}
+            url = self.create_url('resources')
+            headers = self.get_headers()
             params = {'path': file_name}
             response = requests.get(url, headers=headers, params=params)
-            if response.status_code == 404:
-                return False  # Файл не найден, это нормально
-            response.raise_for_status()
-            return response.status_code == 200
-        except requests.RequestException as e:
-            if response.status_code == 401:
-                logging.error("Ошибка при проверке наличия файла на Яндекс.Диске: неверный токен доступа.")
+            if response.status_code == 200:
+                return True
+            elif response.status_code == 404:
+                return False
             else:
-                logging.error(f"Ошибка при проверке наличия файла на Яндекс.Диске: {e}")
+                response.raise_for_status()
+        except requests.RequestException as e:
+            logging.error(f"Ошибка при проверке наличия файла на Яндекс.Диске: {e}")
             return False
 
     def upload_file(self, file_path, file_name):
         try:
-            url = 'https://cloud-api.yandex.net/v1/disk/resources/upload'
-            headers = {'Authorization': f'OAuth {self.token}'}
+            url = self.create_url('resources/upload')
+            headers = self.get_headers()
             params = {'path': file_name, 'overwrite': 'true'}
             response = requests.get(url, headers=headers, params=params)
             response.raise_for_status()
@@ -53,9 +57,6 @@ class YandexDisk:
                 response.raise_for_status()
             logging.info(f"Фотография успешно загружена: {file_name}")
         except requests.RequestException as e:
-            if response.status_code == 401:
-                logging.error("Ошибка при загрузке на Яндекс.Диск: неверный токен доступа.")
-            else:
-                logging.error(f"Ошибка при загрузке на Яндекс.Диск: {e}")
+            logging.error(f"Ошибка при загрузке на Яндекс.Диск: {e}")
         except IOError as e:
             logging.error(f"Ошибка при открытии файла для загрузки на Яндекс.Диск: {e}")

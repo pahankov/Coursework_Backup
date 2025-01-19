@@ -1,31 +1,14 @@
 import json
 import os
 import requests
-import logging
 from tqdm import tqdm
 from vk_api import VKAPI
 from yandex_disk import YandexDisk
+from logger_setup import LoggerSetup
 
 # Настройка логирования
-logger = logging.getLogger('backup_logger')
-logger.setLevel(logging.INFO)
-
-# Создаем обработчик для вывода в консоль
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
-console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-console_handler.setFormatter(console_formatter)
-
-# Создаем обработчик для записи в файл с указанием кодировки UTF-8 и режимом дозаписи
-file_handler = logging.FileHandler('app.log', mode='a', encoding='utf-8')
-file_handler.setLevel(logging.INFO)
-file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-file_handler.setFormatter(file_formatter)
-
-# Проверяем, нет ли уже обработчиков, чтобы избежать дублирования
-if not logger.hasHandlers():
-    logger.addHandler(console_handler)
-    logger.addHandler(file_handler)
+logger_setup = LoggerSetup()
+logger = logger_setup.get_logger()
 
 def save_photos_info(photos_info, file_path):
     try:

@@ -5,9 +5,15 @@ class VKAPI:
     def __init__(self):
         self.token = "vk1.a.qaBLM8IVuTQJxmYSjqK_PF0-6U_MUqygqPLSFIZ6F0GYrkybRFiHkbEmGJeLzORCPQD2_5Qt_qLTDqZWsNhmMpFPL6jqIJIWGuUpQR4pyHGd2RO2Tf3UHEzgQhaFYZ6OimnjpM6sTnl0ACoiDbg2IYm-aEvCzx0W-SG-c6LgY13D9dDiQwr1x2i_jmbMFldA"
 
+    def get_headers(self):
+        return {'Authorization': f'OAuth {self.token}'}
+
+    def create_url(self, endpoint):
+        return f'https://api.vk.com/method/{endpoint}'
+
     def get_user_info(self, user_id):
         try:
-            url = 'https://api.vk.com/method/users.get'
+            url = self.create_url('users.get')
             params = {
                 'user_ids': user_id,
                 'access_token': self.token,
@@ -18,8 +24,7 @@ class VKAPI:
             response.raise_for_status()
             result = response.json()
             if 'response' in result:
-                user_info = result['response'][0]
-                return user_info
+                return result['response'][0]
             else:
                 error_code = result.get('error', {}).get('error_code', 'Unknown')
                 error_msg = result.get('error', {}).get('error_msg', 'Unknown error')
@@ -31,7 +36,7 @@ class VKAPI:
 
     def get_photos(self, user_id, count=5):
         try:
-            url = 'https://api.vk.com/method/photos.get'
+            url = self.create_url('photos.get')
             params = {
                 'owner_id': user_id,
                 'album_id': 'profile',

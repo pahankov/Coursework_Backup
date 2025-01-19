@@ -5,6 +5,30 @@ class VKAPI:
     def __init__(self):
         self.token = "vk1.a.qaBLM8IVuTQJxmYSjqK_PF0-6U_MUqygqPLSFIZ6F0GYrkybRFiHkbEmGJeLzORCPQD2_5Qt_qLTDqZWsNhmMpFPL6jqIJIWGuUpQR4pyHGd2RO2Tf3UHEzgQhaFYZ6OimnjpM6sTnl0ACoiDbg2IYm-aEvCzx0W-SG-c6LgY13D9dDiQwr1x2i_jmbMFldA"
 
+    def get_user_info(self, user_id):
+        try:
+            url = 'https://api.vk.com/method/users.get'
+            params = {
+                'user_ids': user_id,
+                'access_token': self.token,
+                'v': '5.131',
+                'fields': 'is_closed'
+            }
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            result = response.json()
+            if 'response' in result:
+                user_info = result['response'][0]
+                return user_info
+            else:
+                error_code = result.get('error', {}).get('error_code', 'Unknown')
+                error_msg = result.get('error', {}).get('error_msg', 'Unknown error')
+                logging.error(f"Ошибка в ответе: код ошибки {error_code}, сообщение: {error_msg}")
+                return None
+        except requests.RequestException as e:
+            logging.error(f"Ошибка при запросе информации о пользователе: {e}")
+            return None
+
     def get_photos(self, user_id, count=5):
         try:
             url = 'https://api.vk.com/method/photos.get'
@@ -21,6 +45,9 @@ class VKAPI:
             response.raise_for_status()
             result = response.json()
             if 'response' in result:
+                if len(result['response']['items']) == 0:
+                    logging.error("ID пользователя VK не существует или у пользователя нет фотографий.")
+                    return None
                 return result['response']['items']
             else:
                 error_code = result.get('error', {}).get('error_code', 'Unknown')

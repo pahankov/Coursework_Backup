@@ -46,6 +46,17 @@ def main():
     # Информируем пользователя о сохранении логов после ввода данных
     logger.info('Логи будут сохранены в файл app.log')
 
+    # Проверка профиля пользователя
+    user_info = vk_api.get_user_info(vk_user_id)
+    if user_info is None:
+        logger.error("Не удалось получить информацию о пользователе. Пожалуйста, проверьте, что вы ввели правильный ID пользователя.")
+        return
+
+    if user_info.get('is_closed'):
+        logger.error("Профиль пользователя закрыт.")
+        print("Профиль пользователя закрыт. Невозможно получить доступ к фотографиям.")
+        return
+
     # Создаем папку для сохранения фотографий
     if not os.path.exists('photos'):
         os.makedirs('photos')
@@ -56,10 +67,6 @@ def main():
     photos = vk_api.get_photos(vk_user_id, count=photos_count)
     if photos is None:
         logger.error("Не удалось получить фотографии. Пожалуйста, проверьте, что вы ввели правильный токен и ID пользователя.")
-        return
-
-    if len(photos) == 0:
-        logger.error("ID пользователя VK не существует или у пользователя нет фотографий.")
         return
 
     photos_info = []

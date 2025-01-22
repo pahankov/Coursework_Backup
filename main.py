@@ -3,6 +3,7 @@ import sys
 import logging
 import requests
 from tqdm import tqdm
+import keyboard  # Импортируем библиотеку keyboard
 from vk_api import VKAPI
 from yandex_disk import YandexDisk
 from logger_setup import LoggerSetup
@@ -19,14 +20,17 @@ logger_setup = LoggerSetup()
 logger = logger_setup.get_logger()
 file_handler = FileHandler()
 
+def check_escape():
+    if keyboard.is_pressed('escape'):
+        print("Выход из программы.")
+        raise ExitProgramException()
+
 def main():
-    vk_api = VKAPI("vk1.a.qaBLM8IVuTQJxmYSjqK_PF0-6U_MUqygqPLSFIZ6F0GYrkybRFiHkbEmGJeLzORCPQD2_5Qt_qLTDqZWsNhmMpFPL6jqIJIWGuUpQR4pyHGd2RO2Tf3UHEzgQhaFYZ6OimnjpM6sTnl0ACoiDbg2IYm-aEvCzx0W-SG-c6LgY13D9dDiQwr1x2i_jmbMFldA")
+    vk_api = VKAPI("vk1.a.aWbKNSVTZBltDRpdCFNbJt_y7u1b68mQFvKvcK7lF07Ojz7tKOf5c45hy8VrSCybcdeiyRUrwGe8RrCeH-gmDFJUjWcn_wrOcB2UIyWOzP6BCmwnS63MeWyvL6DpYFBmlXDfgGrTN6I5ZoPC9vcUAMoVYtl42pVQcGEEFy6wAsd2AEPULQ19TJZbSG5UjrQv")
     try:
         while True:
             vk_user_id = input('Введите ID пользователя VK (или нажмите Escape для выхода): ')
-            if vk_user_id.lower() == 'escape':
-                print("Выход из программы.")
-                raise ExitProgramException()
+            check_escape()
 
             user_info = vk_api.get_user_info(vk_user_id)
             if user_info is None:
@@ -58,9 +62,7 @@ def main():
 
         while True:
             yandex_token = input('Введите токен Яндекс.Диска (или нажмите Escape для выхода): ')
-            if yandex_token.lower() == 'escape':
-                print("Выход из программы.")
-                raise ExitProgramException()
+            check_escape()
 
             yandex_disk = YandexDisk(yandex_token)
             if not yandex_disk.check_token():
@@ -80,6 +82,7 @@ def main():
             break
 
         photos_count_input = input('Введите количество фотографий для резервного копирования (по умолчанию 5): ')
+        check_escape()
         photos_count = int(photos_count_input) if photos_count_input else 5
 
         # Информируем пользователя о сохранении логов после ввода данных
@@ -147,6 +150,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
 

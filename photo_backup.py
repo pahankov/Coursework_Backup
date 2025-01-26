@@ -43,10 +43,21 @@ class PhotoBackup:
             print("Папка 'VK_Photos' была создана.")
 
         photos_info = []
+        existing_names = set()
         for index, photo in enumerate(tqdm(photos['items'], desc='Сохранение фотографий')):
             max_size_photo = max(photo['sizes'], key=lambda size: size['width'] * size['height'])
             likes_count = photo.get('likes', {}).get('count', 'unknown')
-            unique_file_name = f"{likes_count}.jpg" if likes_count != 'unknown' else f"photo_{photo['date']}.jpg"
+
+            if likes_count == 'unknown':
+                unique_file_name = f"photo_{photo['date']}.jpg"
+            else:
+                unique_file_name = f"{likes_count}.jpg"
+                suffix = 1
+                while unique_file_name in existing_names:
+                    unique_file_name = f"{likes_count} ({suffix}).jpg"
+                    suffix += 1
+
+            existing_names.add(unique_file_name)
 
             # Выводим отладочную информацию
             self.logger.debug(f"Обработка фотографии {index + 1}/{photos_count}: {max_size_photo['url']}")

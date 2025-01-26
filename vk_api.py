@@ -26,6 +26,7 @@ class VKAPI:
             "rev": 1,
             "count": count,
             "photo_sizes": 1,  # Включает размеры фотографий в ответ
+            "extended": 1,     # Включает дополнительную информацию, такую как количество лайков
             "access_token": self.access_token,
             "v": "5.131"
         }
